@@ -1,0 +1,54 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class MostCommonWordFinder {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter directory name: ");
+        String directoryPath = scanner.nextLine();
+
+        try {
+            Map<String, Integer> wordFrequencyMap = findMostCommonWord(directoryPath);
+
+            if (!wordFrequencyMap.isEmpty()) {
+                int maxFrequency = wordFrequencyMap.values().stream().max(Integer::compare).orElse(0);
+
+                System.out.println("Most common word(s):");
+                for (Map.Entry<String, Integer> entry : wordFrequencyMap.entrySet()) {
+                    if (entry.getValue() == maxFrequency) {
+                        System.out.println("Word: " + entry.getKey() + ", Frequency: " + entry.getValue());
+                    }
+                }
+            } else {
+                System.out.println("No words found in the specified directory.");
+            }
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Directory not found or unable to read files: " + e.getMessage());
+        }
+    }
+
+    private static Map<String, Integer> findMostCommonWord(String directoryPath) throws FileNotFoundException {
+        Map<String, Integer> wordFrequencyMap = new HashMap<>();
+
+        File directory = new File(directoryPath);
+        if (directory.exists() && directory.isDirectory()) {
+            for (File file : directory.listFiles()) {
+                if (file.isFile() && file.getName().endsWith(".txt")) {
+                    try (Scanner fileScanner = new Scanner(file)) {
+                        while (fileScanner.hasNext()) {
+                            String word = fileScanner.next().toLowerCase().replaceAll("[^a-zA-Z]", "");
+                            wordFrequencyMap.put(word, wordFrequencyMap.getOrDefault(word, 0) + 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        return wordFrequencyMap;
+    }
+}
